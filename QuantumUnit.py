@@ -3,22 +3,20 @@ from qiskit import Aer, QuantumCircuit, transpile
 from qiskit.quantum_info import partial_trace, Statevector, DensityMatrix
 from itertools import combinations
 
-
-@staticmethod
-def classical_to_statevector(classical_vector):
-     num_qubits = len(classical_vector)
-     num_states = 2 ** num_qubits
-     state_index = int("".join(map(str, classical_vector)), 2)
-     statevector = np.zeros(num_states, dtype=complex)
-     statevector[state_index] = 1.0 + 0.0j
-
-     return statevector
-
-
 class QuantumUnit:
 
     def __init__(self):
         self.backend = Aer.get_backend('aer_simulator_statevector')
+
+    @staticmethod
+    def classical_to_statevector(classical_vector):
+        num_qubits = len(classical_vector)
+        num_states = 2 ** num_qubits
+        state_index = int("".join(map(str, classical_vector)), 2)
+        statevector = np.zeros(num_states, dtype=complex)
+        statevector[state_index] = 1.0 + 0.0j
+
+        return statevector
 
     def run_circuit(self, circuit, initial_state=None):
         """
@@ -27,7 +25,7 @@ class QuantumUnit:
         """
         if initial_state is not None:
             qubit_indexes = [qubit.index for qubit in circuit.qubits]
-            #initial_statevector = classical_to_statevector(initial_state)
+            #initial_statevector = self.classical_to_statevector(initial_state)
             init_cicuit = QuantumCircuit(len(qubit_indexes))
             init_cicuit.initialize(initial_state, qubit_indexes)
             init_cicuit = init_cicuit.compose(circuit)
@@ -51,11 +49,10 @@ class QuantumUnit:
         end_qubit: int, the index of the last qubit to include.
         """
         sliced_circuit = QuantumCircuit(circuit.num_qubits)
-        for layer in range(start_layer, end_layer + 1):
-            for gate, qubits, _ in circuit.data:
-                if gate in circuit.layers()[layer] and all(
-                        qubit in range(start_qubit, end_qubit + 1) for qubit in qubits):
-                    sliced_circuit.append(gate, qubits)
+        for layer, (gate, qubits, _) in enumerate(circuit.data):
+            if start_layer <= layer <= end_layer and all(
+                    start_qubit <= qubit.index <= end_qubit for qubit in qubits):
+                sliced_circuit.append(gate, qubits)
         return sliced_circuit
 
     def is_classical_state(self, probabilities):
@@ -83,12 +80,12 @@ class QuantumUnit:
         Returns: bool, True if the output state equals the expected state, False otherwise.
         """
         # Transform the qubit array to an statevector
-        initial_state = classical_to_statevector(initial_state)
+        initial_state = self.classical_to_statevector(initial_state)
         # Run the circuit
         probabilities = self.run_circuit(circuit, initial_state)
         # Check if the result is a classical state
         if not self.is_classical_state(probabilities):
-            return False
+            raise AssertionError("The output is not a classical state.")
         # Check if the state is equal to the unexpected state
         real_coefficients = np.real(probabilities)
         return np.array_equal(real_coefficients, expected_state)
@@ -105,12 +102,12 @@ class QuantumUnit:
         Returns: bool, True if the output state does not equal the unexpected state, False otherwise.
         """
         # Transform the qubit array to an statevector
-        initial_statevector = classical_to_statevector(initial_state)
+        initial_statevector = self.classical_to_statevector(initial_state)
         # Run the circuit
         probabilities = self.run_circuit(circuit, initial_statevector)
         # Check if the result is a classical state
         if not self.is_classical_state(probabilities):
-            return False
+            raise AssertionError("The output is not a classical state.")
         # Check if the state is not equal to the unexpected state
         real_coefficients = np.real(probabilities)
         """
@@ -134,12 +131,12 @@ class QuantumUnit:
         Returns: bool, True if the output state represents a number less than the expected state, False otherwise.
         """
         # Transform the qubit array to an statevector
-        initial_statevector = classical_to_statevector(initial_state)
+        initial_statevector = self.classical_to_statevector(initial_state)
         # Run the circuit
         probabilities = self.run_circuit(circuit, initial_statevector)
         # Check if the result is a classical state
         if not self.is_classical_state(probabilities):
-            return False
+            raise AssertionError("The output is not a classical state.")
         # Check if the state is less than the expected state
         real_coefficients = np.real(probabilities)
         # Encuentra el índice del coeficiente máximo
@@ -167,12 +164,12 @@ class QuantumUnit:
         Returns: bool, True if the output state represents a number greater than the expected state, False otherwise.
         """
         # Transform the qubit array to an statevector
-        initial_statevector = classical_to_statevector(initial_state)
+        initial_statevector = self.classical_to_statevector(initial_state)
         # Run the circuit
         probabilities = self.run_circuit(circuit, initial_statevector)
         # Check if the result is a classical state
         if not self.is_classical_state(probabilities):
-            return False
+            raise AssertionError("The output is not a classical state.")
         # Check if the state is less than the expected state
         real_coefficients = np.real(probabilities)
         # Encuentra el índice del coeficiente máximo
@@ -202,12 +199,12 @@ class QuantumUnit:
         Returns: bool, True if the output state represents a number between the bounds, False otherwise.
         """
         # Transform the qubit array to an statevector
-        initial_statevector = classical_to_statevector(initial_state)
+        initial_statevector = self.classical_to_statevector(initial_state)
         # Run the circuit
         probabilities = self.run_circuit(circuit, initial_statevector)
         # Check if the result is a classical state
         if not self.is_classical_state(probabilities):
-            return False
+            raise AssertionError("The output is not a classical state.")
         # Check if the state is less than the expected state
         real_coefficients = np.real(probabilities)
         # Encuentra el índice del coeficiente máximo

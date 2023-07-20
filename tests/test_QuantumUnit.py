@@ -207,5 +207,40 @@ class TestQuantumUnit(unittest.TestCase):
         self.assertTrue(result, "assertGeneralEntanglement failed when it should have succeeded.")
         print('test_assertGeneralEntanglement succeeded!')
 
+    def test_slice_circuit_1(self):
+         # Create a quantum circuit
+        test_circuit = QuantumCircuit(3)
+        test_circuit.h(0)
+        test_circuit.cnot(0, 1)
+        test_circuit.cnot(1, 2)
+
+        # Slice the circuit
+        sliced_circuit = self.quantum_unit.slice_circuit(test_circuit, 1, 2, 1, 2)
+        result = self.quantum_unit.assertEntanglement(
+            sliced_circuit,
+            1,
+            2,
+        )
+        self.assertTrue(result, "test_slice_circuit failed -> entanglement test.")
+
+        print('test_slice_circuit_1 succeeded!')
+
+    def test_slice_circuit_2(self):
+        # Create a quantum circuit
+        test_circuit = QuantumCircuit(3)
+        test_circuit.h(0)
+        test_circuit.cnot(0, 1)
+        test_circuit.cnot(1, 2)
+
+        # Slice the circuit
+        sliced_circuit = self.quantum_unit.slice_circuit(test_circuit, 1, 2, 1, 2)
+        initial_state = [0, 0, 0]  # [qn, ... q1, q0]
+        expected_state = [1, 0, 0, 0, 0, 0, 0, 0]  # [prob0, prob1, ...]
+        self.assertTrue(
+            self.quantum_unit.assertClassicalEqual(sliced_circuit, initial_state, expected_state),
+            "test_slice_circuit_2 failed -> value test."
+        )
+        print('test_slice_circuit_2 succeeded!')
+
 if __name__ == "__main__":
     unittest.main()
