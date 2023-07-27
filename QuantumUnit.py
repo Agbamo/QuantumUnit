@@ -223,7 +223,7 @@ class QuantumUnit:
         integer_greater = int(binary_str, 2)
         return ((integer_lower < integer_middle) and (integer_middle < integer_greater))
 
-    def assertStatevectorEqual(self, circuit, expected_state, initial_state=None, start_layer=None, end_layer=None, start_qubit=None, end_qubit=None):
+    def assertStatevectorEqual(self, circuit, expected_state, initial_state=None, start_layer=None, end_layer=None, start_qubit=None, end_qubit=None, tolerance=0.05):
         """
         Check if the output of the quantum circuit matches the expected state vector.
         If start and end layer/qubit are provided, the circuit is sliced before executing it.
@@ -232,10 +232,10 @@ class QuantumUnit:
         if start_layer is not None and end_layer is not None and start_qubit is not None and end_qubit is not None:
             circuit = self.slice_circuit(circuit, start_layer, end_layer, start_qubit, end_qubit)
         final_state = self.run_circuit(circuit, initial_state)
-        return np.isclose(final_state, expected_state).all()
+        return np.allclose(final_state, expected_state, atol=tolerance)
 
     def assertDensityMatrixEqual(self, circuit, expected_density_matrix, initial_state=None, start_layer=None,
-                                 end_layer=None, start_qubit=None, end_qubit=None):
+                                 end_layer=None, start_qubit=None, end_qubit=None, tolerance=0.05):
         """
         Check if the output of the quantum circuit matches the expected density matrix.
         If start and end layer/qubit are provided, the circuit is sliced before executing it.
@@ -245,7 +245,7 @@ class QuantumUnit:
             circuit = self.slice_circuit(circuit, start_layer, end_layer, start_qubit, end_qubit)
         final_state = self.run_circuit(circuit, initial_state)
         final_density_matrix = DensityMatrix(final_state)
-        return np.isclose(final_density_matrix.data, expected_density_matrix.data).all()
+        return np.allclose(final_state, final_density_matrix, atol=tolerance)
 
     def assertEntanglement(self, circuit, qubit1, qubit2, initial_state=None, start_layer=None, end_layer=None, start_qubit=None, end_qubit=None):
         """

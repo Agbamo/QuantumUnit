@@ -235,6 +235,7 @@ class TestQuantumUnit(unittest.TestCase):
         # Slice the circuit
         sliced_circuit = self.quantum_unit.slice_circuit(test_circuit, 1, 2, 1, 2)
         initial_state = [0, 0, 0]  # [qn, ... q1, q0]
+
         expected_state = [1, 0, 0, 0, 0, 0, 0, 0]  # [prob0, prob1, ...]
         self.assertTrue(
             self.quantum_unit.assertClassicalEqual(sliced_circuit, initial_state, expected_state),
