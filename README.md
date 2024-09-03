@@ -45,7 +45,7 @@ For detailed usage, please refer to the documentation: [QuantumUnit Documentatio
 
 ## 4. License
 
-QuantumUnit is licensed under the MIT license. Please see the `LICENSE` file for details.
+QuantumUnit is licensed under the GPL-3.0 license. Please see the `LICENSE` file for details.
 
 ## 5. Contributing
 
